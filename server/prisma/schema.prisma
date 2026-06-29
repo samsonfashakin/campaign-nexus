@@ -4,10 +4,117 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum CampaignRole {
+  GM
+  PLAYER
+}
+
+enum CharacterType {
+  PC
+  NPC
+}
+
+enum MembershipStatus {
+  ACTIVE
+  RETIRED
+}
+
+enum NoteVisibility {
+  PRIVATE
+  SHARED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  createdAt    DateTime @default(now())
+
+  campaignsCreated Campaign[]           @relation("CampaignCreator")
+  memberships      CampaignMembership[]
+  characters       Character[]
+  notes            Note[]
+}
+
+model Campaign {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  createdBy   User                @relation("CampaignCreator", fields: [createdById], references: [id])
+  memberships CampaignMembership[]
+  characters  CampaignCharacter[]
+}
+
+model CampaignMembership {
+  id         String       @id @default(uuid())
+  campaignId String
+  userId     String
+  role       CampaignRole
+  joinedAt   DateTime     @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([campaignId, userId])
+}
+
+model Character {
+  id            String        @id @default(uuid())
+  ownerId       String
+  name          String
+  class         String
+  race          String
+  level         Int           @default(1)
+  characterType CharacterType @default(PC)
+  createdAt     DateTime      @default(now())
+
+  owner     User                @relation(fields: [ownerId], references: [id])
+  inventory InventoryItem[]
+  campaigns CampaignCharacter[]
+}
+
+model CampaignCharacter {
+  id          String           @id @default(uuid())
+  campaignId  String
+  characterId String
+  status      MembershipStatus @default(ACTIVE)
+  joinedAt    DateTime         @default(now())
+
+  campaign  Campaign  @relation(fields: [campaignId], references: [id])
+  character Character @relation(fields: [characterId], references: [id])
+
+  @@unique([characterId], where: raw("status = 'ACTIVE'"))
+}
+
+model InventoryItem {
+  id          String  @id @default(uuid())
+  characterId String
+  name        String
+  quantity    Int     @default(1)
+  sourceIndex String?
+
+  character Character @relation(fields: [characterId], references: [id])
+}
+
+model Note {
+  id         String         @id @default(uuid())
+  authorId   String
+  title      String
+  body       String
+  visibility NoteVisibility @default(PRIVATE)
+  createdAt  DateTime       @default(now())
+
+  author User @relation(fields: [authorId], references: [id])
 }
