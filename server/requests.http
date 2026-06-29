@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:4000
+
+### Sign up
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "gm@example.com",
+  "password": "hunter2",
+  "displayName": "Test GM"
+}
+
+### Log in
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "gm@example.com",
+  "password": "hunter2"
+}
+
+### Check auth — replace TOKEN with the accessToken from the login response above
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZDQxNWJjYy1lNGUyLTRlMTAtOWJmMC1iNjg4YzNjMDUzZTkiLCJpYXQiOjE3ODI3NzM1MzMsImV4cCI6MTc4Mjc3NDQzM30.axBxXbYBoUCSH9FAWp-cetCT_1pL_kRS42Ma30W5W1Y
+
+### Refresh — uses the cookie automatically, no manual token needed
+POST {{baseUrl}}/api/auth/refresh
+
+### Log out
+POST {{baseUrl}}/api/auth/logout
