@@ -5,6 +5,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
+  findUserById,
 } from '../services/authService.js'
 
 const REFRESH_COOKIE_OPTIONS = {
@@ -73,4 +74,14 @@ export async function refresh(req, res) {
 export function logout(req, res) {
   res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS)
   res.status(204).send()
+}
+
+export async function me(req, res) {
+  try {
+    const user = await findUserById(req.userId)
+    if (!user) return res.status(404).json({ error: 'User not found' })
+    res.json({ user })
+  } catch {
+    res.status(500).json({ error: 'Server error' })
+  }
 }

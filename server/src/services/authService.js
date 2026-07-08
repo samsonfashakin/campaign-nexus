@@ -39,3 +39,10 @@ export function verifyAccessToken(token) {
 export function verifyRefreshToken(token) {
   return jwt.verify(token, process.env.JWT_REFRESH_SECRET)
 }
+
+export async function findUserById(id) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: { id: true, email: true, displayName: true },
+  })
+}
