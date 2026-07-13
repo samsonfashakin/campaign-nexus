@@ -41,6 +41,13 @@ export function createCampaign({ name, description, createdById }) {
       createdById,
       memberships: { create: { userId: createdById, role: 'GM' } },
     },
+    include: {
+      memberships: {
+        where: { userId: createdById },
+        select: { role: true },
+      },
+      _count: { select: { characters: true, encounters: true } },
+    },
   })
 }
 
