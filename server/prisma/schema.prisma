@@ -54,9 +54,10 @@ model Campaign {
   createdById String
   createdAt   DateTime @default(now())
 
-  createdBy   User                @relation("CampaignCreator", fields: [createdById], references: [id])
+  createdBy   User                 @relation("CampaignCreator", fields: [createdById], references: [id])
   memberships CampaignMembership[]
   characters  CampaignCharacter[]
+  encounters  Encounter[]          // NEW
 }
 
 model CampaignMembership {
@@ -79,8 +80,24 @@ model Character {
   class         String
   race          String
   level         Int           @default(1)
+  background    String?
   characterType CharacterType @default(PC)
-  createdAt     DateTime      @default(now())
+
+  strength     Int @default(10)
+  dexterity    Int @default(10)
+  constitution Int @default(10)
+  intelligence Int @default(10)
+  wisdom       Int @default(10)
+  charisma     Int @default(10)
+
+  maxHp       Int @default(8)
+  currentHp   Int @default(8)
+  temporaryHp Int @default(0)
+  armorClass  Int @default(10)
+  speed       Int @default(30)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   owner     User                @relation(fields: [ownerId], references: [id])
   inventory InventoryItem[]
@@ -97,6 +114,7 @@ model CampaignCharacter {
   campaign  Campaign  @relation(fields: [campaignId], references: [id])
   character Character @relation(fields: [characterId], references: [id])
 
+  @@unique([campaignId, characterId])  // NEW — prevents duplicate adds
   @@unique([characterId], where: raw("status = 'ACTIVE'"))
 }
 
@@ -105,6 +123,8 @@ model InventoryItem {
   characterId String
   name        String
   quantity    Int     @default(1)
+  weight      Float?
+  description String?
   sourceIndex String?
 
   character Character @relation(fields: [characterId], references: [id])
@@ -119,4 +139,28 @@ model Note {
   createdAt  DateTime       @default(now())
 
   author User @relation(fields: [authorId], references: [id])
+}
+
+model Encounter {
+  id         String   @id @default(uuid())
+  campaignId String
+  name       String
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  campaign Campaign          @relation(fields: [campaignId], references: [id])
+  monsters EncounterMonster[]
+}
+
+model EncounterMonster {
+  id           String  @id @default(uuid())
+  encounterId  String
+  monsterIndex String
+  customName   String?
+  maxHp        Int
+  currentHp    Int
+  notes        String?
+  initiative   Int?
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
 }

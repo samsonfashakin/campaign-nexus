@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser'
 import 'dotenv/config'
 import authRoutes from './routes/authRoutes.js'
 import srdRoutes from './routes/srdRoutes.js'
+import characterRoutes from './routes/characterRoutes.js'
+import campaignRoutes from './routes/campaignRoutes.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -12,13 +14,10 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ message: 'Hello from the API' })
-})
-
+app.get('/api/health', (req, res) => res.status(200).json({ message: 'Hello from the API' }))
 app.use('/api/auth', authRoutes)
 app.use('/api/srd', srdRoutes)
+app.use('/api/characters', characterRoutes)
+app.use('/api/campaigns', campaignRoutes)
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
-})
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`))
